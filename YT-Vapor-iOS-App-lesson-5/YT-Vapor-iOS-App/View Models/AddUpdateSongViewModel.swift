@@ -9,6 +9,7 @@ import SwiftUI
 
 final class AddUpdateSongViewModel: ObservableObject {
     @Published var songTitle = ""
+    var httpClient: HTTPClientProtocol!
     
     var songID: UUID?
     
@@ -19,12 +20,16 @@ final class AddUpdateSongViewModel: ObservableObject {
     var buttonTitle: String {
         songID != nil ? "Update Song" : "Add Song"
     }
+        
+    init(httpClient: HTTPClientProtocol) {
+        self.httpClient = httpClient
+    }
     
-    init() { }
-    
-    init(currentSong: Song) {
+    init(currentSong: Song, httpClient: HTTPClientProtocol) {
         self.songTitle = currentSong.title
         self.songID = currentSong.id
+        
+        self.httpClient = httpClient
     }
     
     func addSong() async throws {
@@ -36,7 +41,7 @@ final class AddUpdateSongViewModel: ObservableObject {
         
         let song = Song(id: nil, title: songTitle)
         
-        try await HttpClient.shared.sendData(to: url,
+        try await httpClient.sendData(to: url,
                                              object: song,
                                              httpMethod: HttpMethods.POST.rawValue)
     }
@@ -63,6 +68,10 @@ final class AddUpdateSongViewModel: ObservableObject {
         }
         
         let songToUpdate = Song(id: songID, title: songTitle)
-        try await HttpClient.shared.sendData(to: url, object: songToUpdate, httpMethod: HttpMethods.PUT.rawValue)
+        try await httpClient.sendData(to: url, object: songToUpdate, httpMethod: HttpMethods.PUT.rawValue)
+    }
+    
+    func isValidSong() -> Bool {
+        !songTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 }

@@ -9,10 +9,11 @@ import SwiftUI
 
 struct SongList: View {
     
-    @StateObject var viewModel = SongListViewModel()
+    let httpClient = HttpClient()
     
+    @StateObject var viewModel = SongListViewModel(httpClient: HttpClient())
     @State var modal: ModalType? = nil
-    
+        
     var body: some View {
         NavigationView {
             List {
@@ -47,9 +48,9 @@ struct SongList: View {
         }) { modal in
             switch modal {
             case .add:
-                AddUpdateSong(viewModel: AddUpdateSongViewModel())
+                AddUpdateSong(viewModel: AddUpdateSongViewModel(httpClient: httpClient))
             case .update(let song):
-                AddUpdateSong(viewModel: AddUpdateSongViewModel(currentSong: song))
+                AddUpdateSong(viewModel: AddUpdateSongViewModel(currentSong: song, httpClient: httpClient))
             }
         }
         .onAppear {
